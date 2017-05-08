@@ -1,8 +1,14 @@
 #cont{position: relative; background-color: #737373; padding: 10px; height: 300px; width:480px;}
 #cont #pickers{position: relative; display: inline-block; width:300px; height: 300px; }
-#cont #pickers #picker{width: 300px; height: 300px; background-color: #ff0000;}
-#cont #pickers #picker-indicator{position: absolute; left: 294px; top: -6px; border: 2px solid black; border-radius: 5px; width: 8px; height: 8px; background-color: white; opacity: 0.5;  pointer-events: none;}
-#cont #sliders{position: relative; display: inline-block; margin-left: 20px;  width:30px; height: 300px;}
+#cont #pickers #picker{ height: 10px; width: 300px; height: 300px;
+                background:-webkit-linear-gradient( rgba(0,0,0,0), #000000), -webkit-linear-gradient(left, #ffffff, rgba(255,255,255,0)) ;
+                background: -o-linear-gradient(rgba(0,0,0,0), #000000), -o-linear-gradient(right,#ffffff, rgba(255,255,255,0));
+                background: -moz-linear-gradient(rgba(0,0,0,0), #000000), -moz-linear-gradient(right, #ffffff, rgba(255,255,255,0));
+                }
+#cont #pickers #picker-indicator{position: absolute; left: 294px; top: -6px; border: 2px solid black; border-radius: 5px; width: 8px; height: 8px; background-color: white; opacity: 0.5;  pointer-events: none; z-index: 5;}
+#cont #sliders{position: relative; display: inline-block; margin-left: 20px;  width:30px; height: 300px;
+    background: -webkit-linear-gradient(#ff0000, #ff007f 8%, #ff00ff 17%, #8000ff 25%, #0000ff  33%, #0080ff 42%, #00ffff 50%,  #00ff80  58%, #00ff00 67%, #80ff00 75%,  #ffff00 83%, #ff7f00 92%, #ff0000 100% );
+    }
 #cont #slider{height: 300px;}
 #cont #sliders #slider-indicator{position: absolute; left: -4px; top: -7px; border: 2px solid black; border-radius: 2px; width: 34px; height: 10px; background-color: white; opacity: 0.5; pointer-events: none;}
 #cont #numbers{ display: inline-block; vertical-align: bottom; margin-left: 10px;  color: white; font-family: Microsoft Yahei;}
