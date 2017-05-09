@@ -16,4 +16,6 @@
 #cont #numbers label span{display: inline-block; width: 20px;}
 #cont #numbers label input{ box-sizing: border-box; width: 50px; height:22px;}
 #cont #numbers #copyText{ margin-left: 6px; border:1px solid #333333; border-radius: 2px; padding-left:4px; width: 40px; height: 22px; background-color: #eeeeee;  vertical-align: bottom; font: 12px/1 Mircrosoft Yahei;}
-#cont #currentColor{position: absolute; top:10px; right:40px; width: 50px; height: 50px; background-color: white;}
+#cont #currentColor{position: absolute; top:10px; right:60px; width: 40px; height: 40px; background-color: white;}
+#cont #transpColor{z-index: 2; position: absolute; top:10px; right:10px; width: 40px; height: 40px; background-color: white; }
+#cont #transpColor111{position: absolute; top:10px; right:10px; width: 40px; height: 40px; background-color: white;}

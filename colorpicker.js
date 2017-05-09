@@ -19,10 +19,13 @@ function colorPicker(element){
             '<label><span>R</span><input type="" name="" id="r" maxLength="3"></label>',
             '<label><span>G</span><input type="" name="" id="g" maxLength="3"></label>',
             '<label><span>B</span><input type="" name="" id="b" maxLength="3"></label>',
+            '<label><span>a</span><input type="" name="" id="a" ></label>',
             '<label><span>#</span><input type="" name="" id="hex" maxLength="6"><button id="copyText">复制</button></label>',
         '</div>',
 
         '<div id="currentColor"></div>',
+        '<div id="transpColor"></div>',
+        '<div id="transpColor111"></div>',
 
     '</div>'
 
@@ -38,24 +41,15 @@ element.innerHTML = colorPickerHTML;
     var pickerIndicator = document.getElementById('picker-indicator');
     var currentColor = document.getElementById('currentColor');
 
+    //输入rgb或者hsv或者十六进制值
     function Color(colorObj){
-        if(typeof colorObj.h == 'number'){
-            this.h = colorObj.h;
-            this.s = colorObj.s;
-            this.v = colorObj.v;
-        }
-        if(typeof colorObj.r == 'number'){
-            this.r = colorObj.r;
-            this.g = colorObj.g;
-            this.b = colorObj.b;
-        }
-        if(typeof colorObj.hex == 'string'){
-            this.hex = colorObj.hex;
-        }
+        this.getColor(colorObj);
+        this.a = 1;
     }
 
     Color.prototype = {
-        constructor:Color,
+
+        //存储颜色值转换的一系列方法
 
         //从hsv到rgb
         hsv2rgb: function(){
@@ -136,9 +130,33 @@ element.innerHTML = colorPickerHTML;
             b16 = this.hex.slice(4);
             this.b = parseInt(b16, 16);
         },
+
+        //得到或改变一种颜色值时其它值也跟着改变
+        getColor: function(colorObj){
+            if(typeof colorObj.h == 'number'){
+                this.h = colorObj.h;
+                this.s = colorObj.s;
+                this.v = colorObj.v;
+                this.hsv2rgb();
+                this.rgb2hex();
+            }
+            if(typeof colorObj.r == 'number'){
+                this.r = colorObj.r;
+                this.g = colorObj.g;
+                this.b = colorObj.b;
+                this.rgb2hsv();
+                this.rgb2hex();
+            }
+            if(typeof colorObj.hex == 'string'){
+                this.hex = colorObj.hex;
+                this.hex2rgb();
+                this.rgb2hsv();
+            }
+
+        }
     }
 
-    //显示颜色值和所取颜色
+    //把颜色和颜色值显示出来
     function showColor(colorObj){
         document.getElementById('h').value = parseInt(colorObj.h);
         document.getElementById('s').value = parseInt(colorObj.s * 100);
@@ -146,11 +164,11 @@ element.innerHTML = colorPickerHTML;
         document.getElementById('r').value = colorObj.r;
         document.getElementById('g').value = colorObj.g;
         document.getElementById('b').value = colorObj.b;
+        document.getElementById('a').value = colorObj.a;
         document.getElementById('hex').value = colorObj.hex;
         var colorBac = new Color( {h: colorObj.h, s: 1, v: 1});
-        colorBac.hsv2rgb();
-        colorBac.rgb2hex();
         picker.style.backgroundColor = '#' + colorBac.hex;
+        transpColor.style.backgroundColor = 'rgba(' + colorObj.r + ',' + colorObj.g + ',' + colorObj.b + ',' + colorObj.a + ')';
         currentColor.style.backgroundColor = '#' + colorObj.hex;
         sliderIndicator.style.top = ((360 - colorObj.h )/ 360 * slider.offsetHeight - sliderIndicator.offsetHeight / 2) + 'px';
         pickerIndicator.style.left = ( colorObj.s * picker.offsetWidth - pickerIndicator.offsetWidth / 2) + 'px';
@@ -158,13 +176,13 @@ element.innerHTML = colorPickerHTML;
     }
 
 
+
     var color = new Color({h: 56, s: 1, v: 1});
-    color.hsv2rgb();
-    color.rgb2hex();
+
     showColor(color);
 
 
-    //获取鼠标
+    //获取鼠标在元素内的相对位置
     function mousePosition(evt) {
         // IE:
         if (window.event && window.event.contentOverflow !== undefined) {
@@ -189,30 +207,18 @@ element.innerHTML = colorPickerHTML;
                 element["on" + type] = handler;
             }
         },
-        removeHandler: function(element, type, handler){
-            if (element.removeEventListener){
-                element.removeEventListener(type, handler, false);
-            } else if (element.detachEvent){
-                element.detachEvent("on" + type, handler);
-            } else {
-                element["on" + type] = null;
-            }
-        }
 
     };
 
-    //根据slide得到色相，并且反应到colorpicker上
+    //根据slide内的鼠标位置得到色相，并且反应到colorpicker上(改变colorBac)
     function sliderListener(colorObj){
         return function(evt){
             evt = evt || window.event;
             var mouse = mousePosition(evt);
             colorObj.h = ( 1 - mouse.y / sliders.offsetHeight ) * 360;
-            colorObj.hsv2rgb();
-            colorObj.rgb2hex();
+            colorObj.getColor({h: colorObj.h, s: colorObj.s, v: colorObj.v});
             showColor(colorObj);
             var colorBac = new Color( {h: colorObj.h, s: 1, v: 1});
-            colorBac.hsv2rgb();
-            colorBac.rgb2hex();
             picker.style.backgroundColor = '#' + colorBac.hex;
             sliderIndicator.style.top = (mouse.y - sliderIndicator.offsetHeight / 2) + 'px';
         };
@@ -227,8 +233,7 @@ element.innerHTML = colorPickerHTML;
                 height = pickers.offsetHeight;
             colorObj.s = mouse.x / width;
             colorObj.v = (height - mouse.y) / height;
-            colorObj.hsv2rgb();
-            colorObj.rgb2hex();
+            colorObj.getColor({h: colorObj.h, s: colorObj.s, v: colorObj.v});
             showColor(colorObj);
             pickerIndicator.style.top = (mouse.y - pickerIndicator.offsetHeight / 2) + 'px';
             pickerIndicator.style.left = (mouse.x - pickerIndicator.offsetWidth / 2) + 'px';
@@ -271,8 +276,7 @@ element.innerHTML = colorPickerHTML;
         if (target == document.getElementById('h')){
             color.h = parseInt(document.getElementById('h').value);
             if ( color.h <= 360){
-                color.hsv2rgb();
-                color.rgb2hex();
+                colorObj.getColor({h: colorObj.h, s: colorObj.s, v: colorObj.v});
                 showColor(color);
             }
             else{
@@ -282,8 +286,7 @@ element.innerHTML = colorPickerHTML;
         else if ( target == document.getElementById('s')){
             color.s = Number(document.getElementById('s').value / 100);
             if ( color.s <= 1){
-                color.hsv2rgb();
-                color.rgb2hex();
+                colorObj.getColor({h: colorObj.h, s: colorObj.s, v: colorObj.v});
                 showColor(color);
 
             }
@@ -294,8 +297,7 @@ element.innerHTML = colorPickerHTML;
         else if (target == document.getElementById('v')){
             color.v = Number(document.getElementById('v').value / 100);
             if ( color.v <= 1){
-                color.hsv2rgb();
-                color.rgb2hex();
+                colorObj.getColor({h: colorObj.h, s: colorObj.s, v: colorObj.v});
                 showColor(color);
 
             }
@@ -306,8 +308,7 @@ element.innerHTML = colorPickerHTML;
         else if (target == document.getElementById('r')){
             color.r = parseInt(document.getElementById('r').value);
             if ( color.r <= 255){
-                color.rgb2hsv();
-                color.rgb2hex();
+                colorObj.getColor({r: colorObj.r, g: colorObj.g, b: colorObj.b});
                 showColor(color);
 
             }
@@ -318,8 +319,7 @@ element.innerHTML = colorPickerHTML;
         else if (target == document.getElementById('g')){
             color.g = parseInt(document.getElementById('g').value);
             if ( color.g <= 255){
-                color.rgb2hsv();
-                color.rgb2hex();
+                colorObj.getColor({r: colorObj.r, g: colorObj.g, b: colorObj.b});
                 showColor(color);
             }
             else{
@@ -329,19 +329,26 @@ element.innerHTML = colorPickerHTML;
         else if (target == document.getElementById('b')){
             color.b = parseInt(document.getElementById('b').value);
             if ( color.b <= 255){
-                color.rgb2hsv();
-                color.rgb2hex();
+                colorObj.getColor({r: colorObj.r, g: colorObj.g, b: colorObj.b});
                 showColor(color);
             }
             else{
                 alert('请输入0~255之间的数值');
             }
         }
+        else if (target == document.getElementById('a')){
+            color.a = parseFloat(document.getElementById('a').value);
+            if ( color.a <= 1 ){
+                showColor(color);
+            }
+            else{
+                alert('请输入0~1之间的数值');
+            }
+        }
         else if (target == document.getElementById('hex')){
             color.hex = document.getElementById('hex').value;
             if ( parseInt(color.hex, 16) >= 0 && parseInt(color.hex, 16) <= parseInt('ffffff', 16) ){
-                color.hex2rgb();
-                color.rgb2hsv();
+                colorObj.getColor({hex: colorObj.hex});
                 showColor(color);
             }
             else{
